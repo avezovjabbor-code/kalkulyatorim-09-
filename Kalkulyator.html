@@ -1,0 +1,1674 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zamonaviy Kalkulyator — Professional & Smart Calculator</title>
+    <meta name="description" content="Zamonaviy, ilmiy va qulay universal kalkulyator. Hisoblash tarixi, konverter va klaviatura qo'llab-quvvatlovi bilan.">
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700;800&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <style>
+        :root {
+            --bg-body: #090d16;
+            --bg-calc: rgba(18, 25, 43, 0.82);
+            --border-glass: rgba(255, 255, 255, 0.08);
+            --border-glow: rgba(59, 130, 246, 0.3);
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --text-muted: #64748b;
+            
+            --btn-num-bg: rgba(30, 41, 59, 0.65);
+            --btn-num-hover: rgba(51, 65, 85, 0.9);
+            --btn-num-text: #f1f5f9;
+            
+            --btn-op-bg: rgba(37, 99, 235, 0.18);
+            --btn-op-hover: rgba(37, 99, 235, 0.35);
+            --btn-op-text: #60a5fa;
+            
+            --btn-fn-bg: rgba(71, 85, 105, 0.25);
+            --btn-fn-hover: rgba(71, 85, 105, 0.45);
+            --btn-fn-text: #cbd5e1;
+            
+            --btn-equals-bg: linear-gradient(135deg, #2563eb, #3b82f6);
+            --btn-equals-shadow: 0 8px 24px -4px rgba(37, 99, 235, 0.5);
+            
+            --accent-glow: #3b82f6;
+            --radius-calc: 28px;
+            --radius-btn: 16px;
+        }
+
+        /* Themes */
+        body.theme-cyber {
+            --bg-body: #0b0616;
+            --bg-calc: rgba(23, 13, 41, 0.85);
+            --border-glow: rgba(168, 85, 247, 0.35);
+            --btn-op-bg: rgba(168, 85, 247, 0.2);
+            --btn-op-hover: rgba(168, 85, 247, 0.4);
+            --btn-op-text: #c084fc;
+            --btn-equals-bg: linear-gradient(135deg, #9333ea, #c084fc);
+            --btn-equals-shadow: 0 8px 24px -4px rgba(168, 85, 247, 0.5);
+            --accent-glow: #a855f7;
+        }
+
+        body.theme-emerald {
+            --bg-body: #04140e;
+            --bg-calc: rgba(9, 36, 26, 0.85);
+            --border-glow: rgba(16, 185, 129, 0.35);
+            --btn-op-bg: rgba(16, 185, 129, 0.2);
+            --btn-op-hover: rgba(16, 185, 129, 0.4);
+            --btn-op-text: #34d399;
+            --btn-equals-bg: linear-gradient(135deg, #059669, #10b981);
+            --btn-equals-shadow: 0 8px 24px -4px rgba(16, 185, 129, 0.5);
+            --accent-glow: #10b981;
+        }
+
+        body.theme-sunset {
+            --bg-body: #140909;
+            --bg-calc: rgba(36, 16, 16, 0.85);
+            --border-glow: rgba(249, 115, 22, 0.35);
+            --btn-op-bg: rgba(249, 115, 22, 0.2);
+            --btn-op-hover: rgba(249, 115, 22, 0.4);
+            --btn-op-text: #fb923c;
+            --btn-equals-bg: linear-gradient(135deg, #ea580c, #f97316);
+            --btn-equals-shadow: 0 8px 24px -4px rgba(249, 115, 22, 0.5);
+            --accent-glow: #f97316;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Outfit', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: var(--bg-body);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px 16px;
+            overflow-x: hidden;
+            position: relative;
+            background-image: 
+                radial-gradient(circle at 20% 20%, rgba(59, 130, 246, 0.12) 0%, transparent 40%),
+                radial-gradient(circle at 80% 80%, rgba(168, 85, 247, 0.08) 0%, transparent 45%);
+            background-attachment: fixed;
+            transition: background 0.4s ease;
+        }
+
+        /* Ambient glowing orbs */
+        .ambient-glow {
+            position: fixed;
+            width: 400px;
+            height: 400px;
+            border-radius: 50%;
+            background: radial-gradient(circle, var(--accent-glow) 0%, transparent 70%);
+            opacity: 0.15;
+            filter: blur(80px);
+            pointer-events: none;
+            z-index: 0;
+            transition: all 0.5s ease;
+        }
+        .glow-1 { top: -100px; left: -100px; }
+        .glow-2 { bottom: -100px; right: -100px; }
+
+        .calculator-wrapper {
+            position: relative;
+            z-index: 10;
+            display: flex;
+            gap: 20px;
+            align-items: flex-start;
+            max-width: 960px;
+            width: 100%;
+            justify-content: center;
+        }
+
+        /* Main Calculator Container */
+        .calculator {
+            background: var(--bg-calc);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border: 1px solid var(--border-glass);
+            border-radius: var(--radius-calc);
+            width: 100%;
+            max-width: 420px;
+            padding: 24px;
+            box-shadow: 
+                0 24px 64px -12px rgba(0, 0, 0, 0.7),
+                0 0 0 1px var(--border-glass),
+                0 0 25px -5px var(--border-glow);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .calculator.scientific-mode {
+            max-width: 580px;
+        }
+
+        /* Header bar */
+        .calc-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 18px;
+            padding-bottom: 14px;
+            border-bottom: 1px solid var(--border-glass);
+        }
+
+        .calc-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            letter-spacing: -0.3px;
+        }
+
+        .calc-title i {
+            color: var(--accent-glow);
+            font-size: 1.2rem;
+            filter: drop-shadow(0 0 8px var(--accent-glow));
+        }
+
+        .calc-controls {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .icon-btn {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-glass);
+            color: var(--text-secondary);
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.2s ease;
+        }
+
+        .icon-btn:hover {
+            background: rgba(255, 255, 255, 0.12);
+            color: var(--text-primary);
+            transform: translateY(-1px);
+        }
+
+        .icon-btn.active {
+            background: var(--btn-op-bg);
+            color: var(--btn-op-text);
+            border-color: var(--btn-op-text);
+        }
+
+        /* Mode Switcher Tabs */
+        .mode-tabs {
+            display: flex;
+            background: rgba(0, 0, 0, 0.25);
+            padding: 4px;
+            border-radius: 12px;
+            margin-bottom: 16px;
+            gap: 4px;
+        }
+
+        .mode-tab {
+            flex: 1;
+            padding: 7px 12px;
+            font-size: 0.82rem;
+            font-weight: 600;
+            text-align: center;
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            border-radius: 9px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+
+        .mode-tab.active {
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--text-primary);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Screen / Display Area */
+        .display-area {
+            background: rgba(0, 0, 0, 0.35);
+            border: 1px solid var(--border-glass);
+            border-radius: 18px;
+            padding: 16px 20px;
+            margin-bottom: 20px;
+            text-align: right;
+            position: relative;
+            box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.3);
+            transition: border-color 0.2s;
+        }
+
+        .display-area:focus-within {
+            border-color: var(--accent-glow);
+        }
+
+        .memory-indicators {
+            display: flex;
+            gap: 8px;
+            position: absolute;
+            top: 10px;
+            left: 16px;
+            font-size: 0.72rem;
+            font-weight: 700;
+            color: var(--accent-glow);
+            letter-spacing: 0.5px;
+        }
+
+        .screen-expression {
+            min-height: 24px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.95rem;
+            color: var(--text-muted);
+            overflow-x: auto;
+            white-space: nowrap;
+            scrollbar-width: none;
+            margin-bottom: 6px;
+            direction: ltr;
+        }
+
+        .screen-expression::-webkit-scrollbar {
+            display: none;
+        }
+
+        .screen-result-wrapper {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+        }
+
+        .screen-result {
+            flex: 1;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 2.4rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            overflow-x: auto;
+            white-space: nowrap;
+            scrollbar-width: none;
+            direction: ltr;
+            letter-spacing: -0.5px;
+            text-align: right;
+            transition: font-size 0.15s ease;
+        }
+
+        .screen-result::-webkit-scrollbar {
+            display: none;
+        }
+
+        .screen-copy-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            font-size: 0.9rem;
+            padding: 6px;
+            border-radius: 6px;
+            transition: all 0.2s;
+        }
+
+        .screen-copy-btn:hover {
+            color: var(--accent-glow);
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        /* Memory Buttons Bar */
+        .memory-bar {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 6px;
+            margin-bottom: 14px;
+        }
+
+        .mem-btn {
+            background: transparent;
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            color: var(--text-secondary);
+            font-size: 0.76rem;
+            font-weight: 600;
+            padding: 6px 0;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .mem-btn:hover:not(:disabled) {
+            background: rgba(255, 255, 255, 0.08);
+            color: var(--text-primary);
+        }
+
+        .mem-btn:disabled {
+            opacity: 0.35;
+            cursor: not-allowed;
+        }
+
+        /* Buttons Grid */
+        .keypad-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+        }
+
+        .scientific-grid {
+            display: none;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .calculator.scientific-mode .scientific-grid {
+            display: grid;
+        }
+
+        /* Base Button */
+        .btn {
+            height: 56px;
+            border: 1px solid transparent;
+            border-radius: var(--radius-btn);
+            font-size: 1.15rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            outline: none;
+            transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .btn:active, .btn.keyboard-active {
+            transform: scale(0.94);
+            filter: brightness(1.2);
+        }
+
+        /* Button Types */
+        .btn-number {
+            background: var(--btn-num-bg);
+            color: var(--btn-num-text);
+            border-color: rgba(255, 255, 255, 0.03);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1.3rem;
+        }
+
+        .btn-number:hover {
+            background: var(--btn-num-hover);
+        }
+
+        .btn-op {
+            background: var(--btn-op-bg);
+            color: var(--btn-op-text);
+            font-size: 1.25rem;
+        }
+
+        .btn-op:hover {
+            background: var(--btn-op-hover);
+        }
+
+        .btn-fn {
+            background: var(--btn-fn-bg);
+            color: var(--btn-fn-text);
+            font-size: 1.05rem;
+        }
+
+        .btn-fn:hover {
+            background: var(--btn-fn-hover);
+        }
+
+        .btn-clear {
+            background: rgba(239, 68, 68, 0.18);
+            color: #f87171;
+            font-weight: 700;
+        }
+
+        .btn-clear:hover {
+            background: rgba(239, 68, 68, 0.32);
+        }
+
+        .btn-sci {
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+            font-weight: 600;
+            height: 44px;
+        }
+
+        .btn-sci:hover {
+            background: rgba(255, 255, 255, 0.12);
+            color: var(--text-primary);
+        }
+
+        .btn-equals {
+            background: var(--btn-equals-bg);
+            color: #ffffff;
+            font-size: 1.4rem;
+            box-shadow: var(--btn-equals-shadow);
+        }
+
+        .btn-equals:hover {
+            filter: brightness(1.1);
+        }
+
+        /* History & Converter Panel */
+        .side-panel {
+            background: var(--bg-calc);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border: 1px solid var(--border-glass);
+            border-radius: var(--radius-calc);
+            width: 320px;
+            height: 570px;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 24px 64px -12px rgba(0, 0, 0, 0.7);
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .panel-header {
+            padding: 18px 20px;
+            border-bottom: 1px solid var(--border-glass);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .panel-title {
+            font-size: 0.95rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--text-primary);
+        }
+
+        .panel-title i {
+            color: var(--accent-glow);
+        }
+
+        .panel-actions {
+            display: flex;
+            gap: 6px;
+        }
+
+        .history-list {
+            flex: 1;
+            padding: 14px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .history-list::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .history-list::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+        }
+
+        .history-item {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border-glass);
+            padding: 12px 14px;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-align: right;
+            position: relative;
+        }
+
+        .history-item:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: var(--accent-glow);
+            transform: translateY(-2px);
+        }
+
+        .history-exp {
+            font-size: 0.82rem;
+            color: var(--text-muted);
+            font-family: 'JetBrains Mono', monospace;
+            margin-bottom: 4px;
+            word-break: break-all;
+        }
+
+        .history-res {
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .history-time {
+            font-size: 0.68rem;
+            color: var(--text-muted);
+            text-align: left;
+            margin-top: 4px;
+        }
+
+        .history-empty {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            color: var(--text-muted);
+            text-align: center;
+            gap: 10px;
+            font-size: 0.88rem;
+        }
+
+        .history-empty i {
+            font-size: 2.2rem;
+            opacity: 0.35;
+        }
+
+        /* Converter Tab inside panel */
+        .converter-view {
+            display: none;
+            flex-direction: column;
+            padding: 16px;
+            gap: 14px;
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .form-label {
+            font-size: 0.78rem;
+            color: var(--text-secondary);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .form-control, .form-select {
+            background: rgba(0, 0, 0, 0.35);
+            border: 1px solid var(--border-glass);
+            color: var(--text-primary);
+            padding: 10px 14px;
+            border-radius: 10px;
+            font-size: 0.95rem;
+            outline: none;
+            transition: border-color 0.2s;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .form-select {
+            font-family: 'Outfit', sans-serif;
+            cursor: pointer;
+        }
+
+        .form-control:focus, .form-select:focus {
+            border-color: var(--accent-glow);
+        }
+
+        .convert-result-card {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid var(--border-glass);
+            border-radius: 12px;
+            padding: 14px;
+            text-align: center;
+            margin-top: 8px;
+        }
+
+        .convert-result-val {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: var(--accent-glow);
+            font-family: 'JetBrains Mono', monospace;
+            word-break: break-all;
+        }
+
+        .convert-result-label {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+
+        /* Toast notification */
+        .toast {
+            position: fixed;
+            bottom: 24px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: rgba(15, 23, 42, 0.92);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--border-glow);
+            color: #ffffff;
+            padding: 10px 20px;
+            border-radius: 50px;
+            font-size: 0.88rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            z-index: 1000;
+            pointer-events: none;
+        }
+
+        .toast.show {
+            transform: translateX(-50%) translateY(0);
+        }
+
+        .toast i {
+            color: #10b981;
+        }
+
+        /* Keyboard hint footer */
+        .keyboard-hint {
+            margin-top: 16px;
+            text-align: center;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+        }
+
+        .keyboard-hint kbd {
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            padding: 2px 6px;
+            border-radius: 5px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.72rem;
+            color: var(--text-secondary);
+        }
+
+        /* Responsive */
+        @media (max-width: 820px) {
+            .calculator-wrapper {
+                flex-direction: column;
+                align-items: center;
+            }
+            .side-panel {
+                width: 100%;
+                max-width: 420px;
+                height: 380px;
+            }
+            .calculator.scientific-mode {
+                max-width: 420px;
+            }
+            .calculator.scientific-mode .scientific-grid {
+                grid-template-columns: repeat(4, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Ambient Background Lighting -->
+    <div class="ambient-glow glow-1"></div>
+    <div class="ambient-glow glow-2"></div>
+
+    <div class="calculator-wrapper">
+        <!-- Main Calculator Window -->
+        <main class="calculator" id="mainCalculator">
+            <!-- Header bar with Title, Sound, Themes & History toggle -->
+            <header class="calc-header">
+                <div class="calc-title">
+                    <i class="fa-solid fa-calculator" aria-hidden="true"></i>
+                    <span>Kalkulyator</span>
+                </div>
+                <div class="calc-controls">
+                    <button class="icon-btn" id="soundToggleBtn" title="Ovozni yoqish/o'chirish" aria-label="Ovoz sozlamasi">
+                        <i class="fa-solid fa-volume-high" id="soundIcon"></i>
+                    </button>
+                    <button class="icon-btn" id="themeCycleBtn" title="Mavzuni almashtirish" aria-label="Mavzu">
+                        <i class="fa-solid fa-palette"></i>
+                    </button>
+                    <button class="icon-btn" id="historyToggleBtn" title="Tarix va vositalar paneli" aria-label="Tarix">
+                        <i class="fa-solid fa-clock-rotate-left"></i>
+                    </button>
+                </div>
+            </header>
+
+            <!-- Mode Selector Tabs -->
+            <nav class="mode-tabs" aria-label="Kalkulyator rejimlari">
+                <button class="mode-tab active" id="tabStandard" onclick="setMode('standard')">
+                    <i class="fa-solid fa-hashtag"></i> Oddiy
+                </button>
+                <button class="mode-tab" id="tabScientific" onclick="setMode('scientific')">
+                    <i class="fa-solid fa-square-root-variable"></i> Ilmiy
+                </button>
+            </nav>
+
+            <!-- Display Area -->
+            <section class="display-area" aria-live="polite">
+                <div class="memory-indicators" id="memoryIndicators"></div>
+                <div class="screen-expression" id="screenExpression">&nbsp;</div>
+                <div class="screen-result-wrapper">
+                    <button class="screen-copy-btn" id="copyResultBtn" title="Natijani nusxalash" aria-label="Nusxa olish">
+                        <i class="fa-regular fa-copy"></i>
+                    </button>
+                    <div class="screen-result" id="screenResult">0</div>
+                </div>
+            </section>
+
+            <!-- Memory Bar -->
+            <div class="memory-bar">
+                <button class="mem-btn" onclick="memClear()" id="btnMC" disabled title="Xotirani tozalash">MC</button>
+                <button class="mem-btn" onclick="memRecall()" id="btnMR" disabled title="Xotiradan o'qish">MR</button>
+                <button class="mem-btn" onclick="memAdd()" id="btnMPlus" title="Xotiraga qo'shish">M+</button>
+                <button class="mem-btn" onclick="memSubtract()" id="btnMMinus" title="Xotiradan ayirish">M-</button>
+                <button class="mem-btn" onclick="memStore()" id="btnMS" title="Xotiraga saqlash">MS</button>
+            </div>
+
+            <!-- Scientific Keys (Visible in scientific mode) -->
+            <div class="scientific-grid" id="scientificGrid">
+                <button class="btn btn-sci" onclick="sciFunc('sin')" title="Sinus">sin</button>
+                <button class="btn btn-sci" onclick="sciFunc('cos')" title="Kosinus">cos</button>
+                <button class="btn btn-sci" onclick="sciFunc('tan')" title="Tangens">tan</button>
+                <button class="btn btn-sci" onclick="sciFunc('sqrt')" title="Kvadrat ildiz">√x</button>
+
+                <button class="btn btn-sci" onclick="sciFunc('pow2')" title="Kvadrat">x²</button>
+                <button class="btn btn-sci" onclick="appendOperator('^')" title="Daraja">xʸ</button>
+                <button class="btn btn-sci" onclick="sciFunc('log')" title="O'nli logarifm">log</button>
+                <button class="btn btn-sci" onclick="sciFunc('ln')" title="Natural logarifm">ln</button>
+
+                <button class="btn btn-sci" onclick="appendConstant('pi')" title="Pi soni (3.1415...)">π</button>
+                <button class="btn btn-sci" onclick="appendConstant('e')" title="Eyler soni (2.718...)">e</button>
+                <button class="btn btn-sci" onclick="sciFunc('fact')" title="Faktorial (n!)">n!</button>
+                <button class="btn btn-sci" onclick="sciFunc('inv')" title="Teskari qiymat (1/x)">1/x</button>
+            </div>
+
+            <!-- Standard Keyboard Grid -->
+            <div class="keypad-grid">
+                <!-- Row 1 -->
+                <button class="btn btn-clear" onclick="clearAll()" id="keyAC" title="Hammasini tozalash (Esc)">AC</button>
+                <button class="btn btn-fn" onclick="deleteLast()" id="keyBackspace" title="Oxirgisini o'chirish (Backspace)">
+                    <i class="fa-solid fa-delete-left"></i>
+                </button>
+                <button class="btn btn-fn" onclick="appendBracket()" id="keyBracket" title="Qavslar ( )">( )</button>
+                <button class="btn btn-op" onclick="appendOperator('/')" id="keyDiv" title="Bo'lish (/)">÷</button>
+
+                <!-- Row 2 -->
+                <button class="btn btn-number" onclick="appendNumber('7')" id="key7">7</button>
+                <button class="btn btn-number" onclick="appendNumber('8')" id="key8">8</button>
+                <button class="btn btn-number" onclick="appendNumber('9')" id="key9">9</button>
+                <button class="btn btn-op" onclick="appendOperator('*')" id="keyMul" title="Ko'paytirish (*)">×</button>
+
+                <!-- Row 3 -->
+                <button class="btn btn-number" onclick="appendNumber('4')" id="key4">4</button>
+                <button class="btn btn-number" onclick="appendNumber('5')" id="key5">5</button>
+                <button class="btn btn-number" onclick="appendNumber('6')" id="key6">6</button>
+                <button class="btn btn-op" onclick="appendOperator('-')" id="keySub" title="Ayirish (-)">−</button>
+
+                <!-- Row 4 -->
+                <button class="btn btn-number" onclick="appendNumber('1')" id="key1">1</button>
+                <button class="btn btn-number" onclick="appendNumber('2')" id="key2">2</button>
+                <button class="btn btn-number" onclick="appendNumber('3')" id="key3">3</button>
+                <button class="btn btn-op" onclick="appendOperator('+')" id="keyAdd" title="Qo'shish (+)">+</button>
+
+                <!-- Row 5 -->
+                <button class="btn btn-fn" onclick="toggleSign()" id="keySign" title="Ishorani o'zgartirish (±)">±</button>
+                <button class="btn btn-number" onclick="appendNumber('0')" id="key0">0</button>
+                <button class="btn btn-fn" onclick="appendDot()" id="keyDot" title="Vergul / Nuqta (.)">.</button>
+                <button class="btn btn-equals" onclick="calculateResult()" id="keyEqual" title="Teng (Enter)">=</button>
+            </div>
+
+            <footer class="keyboard-hint">
+                <span>Klaviatura: <kbd>0-9</kbd> <kbd>+ - * /</kbd> <kbd>Enter</kbd> <kbd>Esc</kbd></span>
+            </footer>
+        </main>
+
+        <!-- Side Panel: History & Unit Converter -->
+        <aside class="side-panel" id="sidePanel">
+            <div class="panel-header">
+                <div class="panel-title" id="sidePanelTitle">
+                    <i class="fa-solid fa-clock-rotate-left"></i>
+                    <span>Hisoblash Tarixi</span>
+                </div>
+                <div class="panel-actions">
+                    <button class="icon-btn" id="tabHistoryBtn" title="Tarix" onclick="switchSideTab('history')">
+                        <i class="fa-solid fa-list-ul"></i>
+                    </button>
+                    <button class="icon-btn" id="tabConverterBtn" title="Konverter" onclick="switchSideTab('converter')">
+                        <i class="fa-solid fa-arrow-right-arrow-left"></i>
+                    </button>
+                    <button class="icon-btn" id="clearHistoryBtn" title="Tarixni tozalash" onclick="clearHistory()">
+                        <i class="fa-regular fa-trash-can"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- History View -->
+            <div class="history-list" id="historyList">
+                <div class="history-empty" id="historyEmpty">
+                    <i class="fa-solid fa-calculator"></i>
+                    <p>Hozircha tarix yo'q.<br>Hisoblashlar bu yerda ko'rinadi.</p>
+                </div>
+            </div>
+
+            <!-- Quick Unit & Currency Converter View -->
+            <div class="converter-view" id="converterView">
+                <div class="form-group">
+                    <label class="form-label" for="converterCategory">Yo'nalish</label>
+                    <select class="form-select" id="converterCategory" onchange="setupConverterUnits()">
+                        <option value="currency">Valyuta (USD, UZS, EUR, RUB)</option>
+                        <option value="length">Uzunlik (m, km, sm, fut, dyuym)</option>
+                        <option value="weight">Og'irlik (kg, gramm, tonna, funt)</option>
+                        <option value="temp">Harorat (°C, °F, Kelvin)</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="convertFromVal">Qiymat</label>
+                    <input type="number" class="form-control" id="convertFromVal" value="1" step="any" oninput="doConversion()">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="convertFromUnit">Qayerdan</label>
+                    <select class="form-select" id="convertFromUnit" onchange="doConversion()"></select>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="convertToUnit">Qayerga</label>
+                    <select class="form-select" id="convertToUnit" onchange="doConversion()"></select>
+                </div>
+
+                <div class="convert-result-card">
+                    <div class="convert-result-val" id="convertedResultDisplay">12 850 UZS</div>
+                    <div class="convert-result-label" id="convertedResultSub">Natija</div>
+                </div>
+
+                <button class="btn btn-op" style="height: 44px; font-size: 0.9rem; margin-top: auto;" onclick="insertConvertedToCalc()">
+                    <i class="fa-solid fa-arrow-left" style="margin-right: 6px;"></i> Kalkulyatorga yozish
+                </button>
+            </div>
+        </aside>
+    </div>
+
+    <!-- Toast Notification -->
+    <div class="toast" id="toastNotification">
+        <i class="fa-solid fa-circle-check"></i>
+        <span id="toastMessage">Nusxa olindi!</span>
+    </div>
+
+    <!-- Logic Script -->
+    <script>
+        // State
+        let currentExpression = '';
+        let currentResult = '0';
+        let isEvaluated = false;
+        let memoryValue = 0;
+        let soundEnabled = true;
+        let currentThemeIndex = 0;
+        const themes = ['default', 'theme-cyber', 'theme-emerald', 'theme-sunset'];
+        let calculationHistory = [];
+
+        // Audio synthesizer using Web Audio API (crisp click feedback without external assets)
+        let audioCtx = null;
+        function playClickSound(freq = 600, duration = 0.04, type = 'sine') {
+            if (!soundEnabled) return;
+            try {
+                if (!audioCtx) {
+                    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                }
+                if (audioCtx.state === 'suspended') {
+                    audioCtx.resume();
+                }
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = type;
+                osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(100, audioCtx.currentTime + duration);
+
+                gain.gain.setValueAtTime(0.12, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start();
+                osc.stop(audioCtx.currentTime + duration);
+            } catch (e) {
+                // Ignore audio context autoplay limitations
+            }
+        }
+
+        // Initialize from LocalStorage
+        window.addEventListener('DOMContentLoaded', () => {
+            try {
+                const savedHistory = localStorage.getItem('calc_history_data');
+                if (savedHistory) {
+                    calculationHistory = JSON.parse(savedHistory);
+                    renderHistory();
+                }
+                const savedTheme = localStorage.getItem('calc_theme');
+                if (savedTheme) {
+                    currentThemeIndex = parseInt(savedTheme) || 0;
+                    applyTheme();
+                }
+                const savedSound = localStorage.getItem('calc_sound');
+                if (savedSound !== null) {
+                    soundEnabled = savedSound === 'true';
+                    updateSoundIcon();
+                }
+            } catch (e) {
+                console.error(e);
+            }
+
+            setupConverterUnits();
+            updateDisplay();
+        });
+
+        // Theme management
+        const themeCycleBtn = document.getElementById('themeCycleBtn');
+        themeCycleBtn.addEventListener('click', () => {
+            playClickSound(800, 0.05);
+            currentThemeIndex = (currentThemeIndex + 1) % themes.length;
+            applyTheme();
+            localStorage.setItem('calc_theme', currentThemeIndex);
+            showToast('Mavzu o\'zgartirildi');
+        });
+
+        function applyTheme() {
+            document.body.className = '';
+            const t = themes[currentThemeIndex];
+            if (t !== 'default') {
+                document.body.classList.add(t);
+            }
+        }
+
+        // Sound toggle
+        const soundToggleBtn = document.getElementById('soundToggleBtn');
+        const soundIcon = document.getElementById('soundIcon');
+        soundToggleBtn.addEventListener('click', () => {
+            soundEnabled = !soundEnabled;
+            localStorage.setItem('calc_sound', soundEnabled);
+            updateSoundIcon();
+            if (soundEnabled) playClickSound(750, 0.06);
+            showToast(soundEnabled ? 'Ovoz yoqildi' : 'Ovoz o\'chirildi');
+        });
+
+        function updateSoundIcon() {
+            if (soundEnabled) {
+                soundIcon.className = 'fa-solid fa-volume-high';
+                soundToggleBtn.classList.remove('active');
+            } else {
+                soundIcon.className = 'fa-solid fa-volume-xmark';
+                soundToggleBtn.classList.add('active');
+            }
+        }
+
+        // Mode Switching
+        function setMode(mode) {
+            playClickSound(500, 0.05);
+            const calc = document.getElementById('mainCalculator');
+            const tabStd = document.getElementById('tabStandard');
+            const tabSci = document.getElementById('tabScientific');
+
+            if (mode === 'scientific') {
+                calc.classList.add('scientific-mode');
+                tabSci.classList.add('active');
+                tabStd.classList.remove('active');
+            } else {
+                calc.classList.remove('scientific-mode');
+                tabStd.classList.add('active');
+                tabSci.classList.remove('active');
+            }
+        }
+
+        // Side panel toggle
+        const historyToggleBtn = document.getElementById('historyToggleBtn');
+        const sidePanel = document.getElementById('sidePanel');
+        historyToggleBtn.addEventListener('click', () => {
+            playClickSound(650, 0.05);
+            if (sidePanel.style.display === 'none') {
+                sidePanel.style.display = 'flex';
+                historyToggleBtn.classList.add('active');
+            } else {
+                sidePanel.style.display = 'none';
+                historyToggleBtn.classList.remove('active');
+            }
+        });
+
+        // Tab in side panel
+        function switchSideTab(tab) {
+            playClickSound(550, 0.04);
+            const histList = document.getElementById('historyList');
+            const convView = document.getElementById('converterView');
+            const title = document.getElementById('sidePanelTitle');
+            const btnHist = document.getElementById('tabHistoryBtn');
+            const btnConv = document.getElementById('tabConverterBtn');
+            const clearHistBtn = document.getElementById('clearHistoryBtn');
+
+            if (tab === 'history') {
+                histList.style.display = 'flex';
+                convView.style.display = 'none';
+                btnHist.classList.add('active');
+                btnConv.classList.remove('active');
+                clearHistBtn.style.display = 'flex';
+                title.innerHTML = '<i class="fa-solid fa-clock-rotate-left"></i><span>Hisoblash Tarixi</span>';
+            } else {
+                histList.style.display = 'none';
+                convView.style.display = 'flex';
+                btnHist.classList.remove('active');
+                btnConv.classList.add('active');
+                clearHistBtn.style.display = 'none';
+                title.innerHTML = '<i class="fa-solid fa-arrow-right-arrow-left"></i><span>Tezkor Konverter</span>';
+                doConversion();
+            }
+        }
+
+        // Calculator Core Functions
+        function appendNumber(num) {
+            playClickSound(500, 0.03);
+            if (isEvaluated) {
+                currentResult = num;
+                currentExpression = '';
+                isEvaluated = false;
+            } else {
+                if (currentResult === '0' || currentResult === 'Xatolik') {
+                    currentResult = num;
+                } else {
+                    currentResult += num;
+                }
+            }
+            updateDisplay();
+        }
+
+        function appendDot() {
+            playClickSound(550, 0.03);
+            if (isEvaluated) {
+                currentResult = '0.';
+                currentExpression = '';
+                isEvaluated = false;
+            } else if (!currentResult.includes('.')) {
+                currentResult += '.';
+            }
+            updateDisplay();
+        }
+
+        function appendOperator(op) {
+            playClickSound(700, 0.04);
+            if (currentResult === 'Xatolik') return;
+
+            let symbol = op;
+            if (op === '*') symbol = '×';
+            if (op === '/') symbol = '÷';
+            if (op === '-') symbol = '−';
+
+            if (isEvaluated) {
+                currentExpression = currentResult + ' ' + symbol + ' ';
+                currentResult = '0';
+                isEvaluated = false;
+            } else {
+                if (currentExpression !== '' && (currentResult === '0' || currentResult === '')) {
+                    // Replace the trailing operator
+                    currentExpression = currentExpression.trim().replace(/[+\−×÷\^]$/, symbol) + ' ';
+                } else {
+                    currentExpression += currentResult + ' ' + symbol + ' ';
+                    currentResult = '0';
+                }
+            }
+            updateDisplay();
+        }
+
+        function appendBracket() {
+            playClickSound(600, 0.04);
+            const openCount = (currentExpression.match(/\(/g) || []).length;
+            const closeCount = (currentExpression.match(/\)/g) || []).length;
+
+            if (openCount > closeCount && currentResult !== '0') {
+                currentExpression += currentResult + ' ) ';
+                currentResult = '0';
+            } else {
+                if (currentResult !== '0') {
+                    currentExpression += currentResult + ' × ( ';
+                } else {
+                    currentExpression += '( ';
+                }
+                currentResult = '0';
+            }
+            updateDisplay();
+        }
+
+        function toggleSign() {
+            playClickSound(500, 0.03);
+            if (currentResult === '0' || currentResult === 'Xatolik') return;
+            if (currentResult.startsWith('-')) {
+                currentResult = currentResult.substring(1);
+            } else {
+                currentResult = '-' + currentResult;
+            }
+            updateDisplay();
+        }
+
+        function deleteLast() {
+            playClickSound(420, 0.04);
+            if (isEvaluated) {
+                currentExpression = '';
+                isEvaluated = false;
+            }
+            if (currentResult.length > 1) {
+                currentResult = currentResult.slice(0, -1);
+            } else {
+                currentResult = '0';
+            }
+            updateDisplay();
+        }
+
+        function clearAll() {
+            playClickSound(350, 0.05);
+            currentExpression = '';
+            currentResult = '0';
+            isEvaluated = false;
+            updateDisplay();
+        }
+
+        // Scientific functions
+        function sciFunc(type) {
+            playClickSound(750, 0.05);
+            let val = parseFloat(currentResult);
+            if (isNaN(val)) return;
+
+            let res = 0;
+            let exprLabel = '';
+
+            switch (type) {
+                case 'sin':
+                    res = Math.sin((val * Math.PI) / 180);
+                    exprLabel = `sin(${val}°)`;
+                    break;
+                case 'cos':
+                    res = Math.cos((val * Math.PI) / 180);
+                    exprLabel = `cos(${val}°)`;
+                    break;
+                case 'tan':
+                    if (Math.abs(val % 180) === 90) {
+                        currentResult = 'Xatolik';
+                        updateDisplay();
+                        return;
+                    }
+                    res = Math.tan((val * Math.PI) / 180);
+                    exprLabel = `tan(${val}°)`;
+                    break;
+                case 'sqrt':
+                    if (val < 0) {
+                        currentResult = 'Xatolik';
+                        updateDisplay();
+                        return;
+                    }
+                    res = Math.sqrt(val);
+                    exprLabel = `√(${val})`;
+                    break;
+                case 'pow2':
+                    res = Math.pow(val, 2);
+                    exprLabel = `sqr(${val})`;
+                    break;
+                case 'log':
+                    if (val <= 0) {
+                        currentResult = 'Xatolik';
+                        updateDisplay();
+                        return;
+                    }
+                    res = Math.log10(val);
+                    exprLabel = `log(${val})`;
+                    break;
+                case 'ln':
+                    if (val <= 0) {
+                        currentResult = 'Xatolik';
+                        updateDisplay();
+                        return;
+                    }
+                    res = Math.log(val);
+                    exprLabel = `ln(${val})`;
+                    break;
+                case 'fact':
+                    if (val < 0 || val > 170 || !Number.isInteger(val)) {
+                        currentResult = 'Xatolik';
+                        updateDisplay();
+                        return;
+                    }
+                    res = factorial(val);
+                    exprLabel = `${val}!`;
+                    break;
+                case 'inv':
+                    if (val === 0) {
+                        currentResult = 'Xatolik';
+                        updateDisplay();
+                        return;
+                    }
+                    res = 1 / val;
+                    exprLabel = `1/(${val})`;
+                    break;
+            }
+
+            // Round precision
+            res = cleanFloat(res);
+            addToHistory(exprLabel, res);
+            currentExpression = exprLabel + ' =';
+            currentResult = res.toString();
+            isEvaluated = true;
+            updateDisplay();
+        }
+
+        function appendConstant(constName) {
+            playClickSound(650, 0.04);
+            if (constName === 'pi') {
+                currentResult = cleanFloat(Math.PI).toString();
+            } else if (constName === 'e') {
+                currentResult = cleanFloat(Math.E).toString();
+            }
+            isEvaluated = false;
+            updateDisplay();
+        }
+
+        function factorial(n) {
+            if (n === 0 || n === 1) return 1;
+            let result = 1;
+            for (let i = 2; i <= n; i++) result *= i;
+            return result;
+        }
+
+        function cleanFloat(num) {
+            return parseFloat(num.toFixed(10));
+        }
+
+        // Calculation Evaluation
+        function calculateResult() {
+            playClickSound(900, 0.06, 'triangle');
+            if (isEvaluated || (currentExpression === '' && currentResult === '0')) return;
+
+            let fullExpr = currentExpression + currentResult;
+            
+            // Clean tokens for JS eval
+            let parseStr = fullExpr
+                .replace(/×/g, '*')
+                .replace(/÷/g, '/')
+                .replace(/−/g, '-')
+                .replace(/\^/g, '**');
+
+            try {
+                // Auto-close missing brackets
+                const openCount = (parseStr.match(/\(/g) || []).length;
+                const closeCount = (parseStr.match(/\)/g) || []).length;
+                for (let i = 0; i < (openCount - closeCount); i++) {
+                    parseStr += ')';
+                }
+
+                // Security check for eval
+                if (!/^[\d\s+\-*/().%**eE]+$/.test(parseStr.replace(/Math\.\w+/g, ''))) {
+                    throw new Error('Noto\'g\'ri ifoda');
+                }
+
+                let evaluated = Function(`"use strict"; return (${parseStr})`)();
+                
+                if (typeof evaluated !== 'number' || !isFinite(evaluated)) {
+                    currentResult = 'Xatolik';
+                } else {
+                    evaluated = cleanFloat(evaluated);
+                    addToHistory(fullExpr, evaluated);
+                    currentExpression = fullExpr + ' =';
+                    currentResult = evaluated.toString();
+                    isEvaluated = true;
+                }
+            } catch (err) {
+                console.error(err);
+                currentResult = 'Xatolik';
+            }
+
+            updateDisplay();
+        }
+
+        // Update Screen UI
+        function updateDisplay() {
+            const expEl = document.getElementById('screenExpression');
+            const resEl = document.getElementById('screenResult');
+
+            expEl.textContent = currentExpression || ' ';
+            
+            // Format number with spaces if numeric
+            let displayVal = currentResult;
+            if (displayVal !== 'Xatolik' && !displayVal.endsWith('.') && !isNaN(displayVal)) {
+                const parts = displayVal.split('.');
+                parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+                displayVal = parts.join('.');
+            }
+
+            resEl.textContent = displayVal;
+
+            // Auto-resize long numbers
+            if (displayVal.length > 12) {
+                resEl.style.fontSize = '1.7rem';
+            } else if (displayVal.length > 9) {
+                resEl.style.fontSize = '2.0rem';
+            } else {
+                resEl.style.fontSize = '2.4rem';
+            }
+        }
+
+        // Memory Handling
+        function updateMemoryButtons() {
+            const hasMem = memoryValue !== 0;
+            document.getElementById('btnMC').disabled = !hasMem;
+            document.getElementById('btnMR').disabled = !hasMem;
+            document.getElementById('memoryIndicators').innerHTML = hasMem ? '<span>[M: ' + memoryValue + ']</span>' : '';
+        }
+
+        function memClear() {
+            playClickSound(400, 0.04);
+            memoryValue = 0;
+            updateMemoryButtons();
+            showToast('Xotira tozalandi');
+        }
+
+        function memRecall() {
+            playClickSound(550, 0.04);
+            currentResult = memoryValue.toString();
+            isEvaluated = false;
+            updateDisplay();
+        }
+
+        function memAdd() {
+            playClickSound(650, 0.04);
+            let val = parseFloat(currentResult);
+            if (!isNaN(val)) {
+                memoryValue = cleanFloat(memoryValue + val);
+                updateMemoryButtons();
+                showToast(`Xotiraga qo'shildi (${memoryValue})`);
+            }
+        }
+
+        function memSubtract() {
+            playClickSound(650, 0.04);
+            let val = parseFloat(currentResult);
+            if (!isNaN(val)) {
+                memoryValue = cleanFloat(memoryValue - val);
+                updateMemoryButtons();
+                showToast(`Xotiradan ayirildi (${memoryValue})`);
+            }
+        }
+
+        function memStore() {
+            playClickSound(700, 0.05);
+            let val = parseFloat(currentResult);
+            if (!isNaN(val)) {
+                memoryValue = val;
+                updateMemoryButtons();
+                showToast(`Xotiraga saqlandi: ${memoryValue}`);
+            }
+        }
+
+        // History Management
+        function addToHistory(expression, result) {
+            const now = new Date();
+            const timeStr = now.getHours().toString().padStart(2, '0') + ':' + now.getMinutes().toString().padStart(2, '0');
+            calculationHistory.unshift({
+                expression: expression,
+                result: result,
+                time: timeStr
+            });
+
+            if (calculationHistory.length > 40) {
+                calculationHistory.pop();
+            }
+
+            try {
+                localStorage.setItem('calc_history_data', JSON.stringify(calculationHistory));
+            } catch (e) {}
+
+            renderHistory();
+        }
+
+        function renderHistory() {
+            const listEl = document.getElementById('historyList');
+            const emptyEl = document.getElementById('historyEmpty');
+
+            if (calculationHistory.length === 0) {
+                emptyEl.style.display = 'flex';
+                listEl.innerHTML = '';
+                listEl.appendChild(emptyEl);
+                return;
+            }
+
+            emptyEl.style.display = 'none';
+            listEl.innerHTML = '';
+
+            calculationHistory.forEach((item, idx) => {
+                const card = document.createElement('div');
+                card.className = 'history-item';
+                card.innerHTML = `
+                    <div class="history-exp">${item.expression} =</div>
+                    <div class="history-res">${item.result}</div>
+                    <div class="history-time"><i class="fa-regular fa-clock"></i> ${item.time}</div>
+                `;
+                card.addEventListener('click', () => {
+                    playClickSound(600, 0.04);
+                    currentResult = item.result.toString();
+                    isEvaluated = false;
+                    updateDisplay();
+                    showToast('Natija kiritildi');
+                });
+                listEl.appendChild(card);
+            });
+        }
+
+        function clearHistory() {
+            playClickSound(350, 0.05);
+            calculationHistory = [];
+            localStorage.removeItem('calc_history_data');
+            renderHistory();
+            showToast('Tarix tozalandi');
+        }
+
+        // Copy Result to Clipboard
+        const copyResultBtn = document.getElementById('copyResultBtn');
+        copyResultBtn.addEventListener('click', () => {
+            playClickSound(600, 0.04);
+            navigator.clipboard.writeText(currentResult).then(() => {
+                showToast('Natija nusxalandi: ' + currentResult);
+            }).catch(() => {
+                showToast('Nusxalab bo\'lmadi');
+            });
+        });
+
+        // Toast feedback
+        let toastTimeout = null;
+        function showToast(msg) {
+            const toast = document.getElementById('toastNotification');
+            const toastMsg = document.getElementById('toastMessage');
+            toastMsg.textContent = msg;
+            toast.classList.add('show');
+
+            if (toastTimeout) clearTimeout(toastTimeout);
+            toastTimeout = setTimeout(() => {
+                toast.classList.remove('show');
+            }, 2000);
+        }
+
+        // Unit & Currency Converter Definitions
+        const converterData = {
+            currency: {
+                rates: {
+                    USD: 1,
+                    UZS: 12850,
+                    EUR: 0.92,
+                    RUB: 92.5
+                },
+                labels: { USD: 'USD ($)', UZS: "UZS (so'm)", EUR: 'EUR (€)', RUB: 'RUB (₽)' }
+            },
+            length: {
+                rates: {
+                    m: 1,
+                    km: 0.001,
+                    cm: 100,
+                    mm: 1000,
+                    ft: 3.28084,
+                    inch: 39.3701
+                },
+                labels: { m: 'Metr (m)', km: 'Kilometr (km)', cm: 'Santimetr (sm)', mm: 'Millimetr (mm)', ft: 'Fut (ft)', inch: 'Dyuym (in)' }
+            },
+            weight: {
+                rates: {
+                    kg: 1,
+                    g: 1000,
+                    t: 0.001,
+                    lb: 2.20462,
+                    oz: 35.274
+                },
+                labels: { kg: 'Kilogramm (kg)', g: 'Gramm (g)', t: 'Tonna (t)', lb: 'Funt (lb)', oz: 'Unsiya (oz)' }
+            },
+            temp: {
+                labels: { c: 'Selsiy (°C)', f: 'Farengeyt (°F)', k: 'Kelvin (K)' }
+            }
+        };
+
+        function setupConverterUnits() {
+            const cat = document.getElementById('converterCategory').value;
+            const fromSelect = document.getElementById('convertFromUnit');
+            const toSelect = document.getElementById('convertToUnit');
+
+            fromSelect.innerHTML = '';
+            toSelect.innerHTML = '';
+
+            const units = converterData[cat].labels;
+            const keys = Object.keys(units);
+
+            keys.forEach((key, idx) => {
+                const opt1 = new Option(units[key], key);
+                const opt2 = new Option(units[key], key);
+                fromSelect.add(opt1);
+                toSelect.add(opt2);
+            });
+
+            if (keys.length > 1) {
+                toSelect.selectedIndex = 1;
+            }
+
+            doConversion();
+        }
+
+        let currentConvertedValue = 0;
+        function doConversion() {
+            const cat = document.getElementById('converterCategory').value;
+            const val = parseFloat(document.getElementById('convertFromVal').value) || 0;
+            const from = document.getElementById('convertFromUnit').value;
+            const to = document.getElementById('convertToUnit').value;
+            const display = document.getElementById('convertedResultDisplay');
+            const sub = document.getElementById('convertedResultSub');
+
+            let result = 0;
+
+            if (cat === 'temp') {
+                // Celsius base
+                let c = val;
+                if (from === 'f') c = (val - 32) * (5 / 9);
+                if (from === 'k') c = val - 273.15;
+
+                if (to === 'c') result = c;
+                if (to === 'f') result = (c * 9/5) + 32;
+                if (to === 'k') result = c + 273.15;
+            } else {
+                const rates = converterData[cat].rates;
+                // Convert from -> Base -> to
+                const baseVal = val / rates[from];
+                result = baseVal * rates[to];
+            }
+
+            result = cleanFloat(result);
+            currentConvertedValue = result;
+
+            // Formatting
+            const unitLabel = converterData[cat].labels[to];
+            display.textContent = result.toLocaleString() + ' ' + to.toUpperCase();
+            sub.textContent = `${val} ${from.toUpperCase()} = ${result.toLocaleString()} ${to.toUpperCase()}`;
+        }
+
+        function insertConvertedToCalc() {
+            playClickSound(650, 0.05);
+            currentResult = currentConvertedValue.toString();
+            isEvaluated = false;
+            updateDisplay();
+            showToast('Kalkulyatorga o\'tkazildi: ' + currentConvertedValue);
+        }
+
+        // Keyboard Shortcut Support
+        window.addEventListener('keydown', (e) => {
+            // If typing in input form of converter, don't trigger global calc shortcuts
+            if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT') {
+                return;
+            }
+
+            let key = e.key;
+            let btnId = null;
+
+            if (key >= '0' && key <= '9') {
+                appendNumber(key);
+                btnId = 'key' + key;
+            } else if (key === '.' || key === ',') {
+                appendDot();
+                btnId = 'keyDot';
+            } else if (key === '+') {
+                appendOperator('+');
+                btnId = 'keyAdd';
+            } else if (key === '-') {
+                appendOperator('-');
+                btnId = 'keySub';
+            } else if (key === '*' || key === 'x' || key === 'X') {
+                appendOperator('*');
+                btnId = 'keyMul';
+            } else if (key === '/') {
+                e.preventDefault();
+                appendOperator('/');
+                btnId = 'keyDiv';
+            } else if (key === 'Enter' || key === '=') {
+                e.preventDefault();
+                calculateResult();
+                btnId = 'keyEqual';
+            } else if (key === 'Backspace') {
+                deleteLast();
+                btnId = 'keyBackspace';
+            } else if (key === 'Escape') {
+                clearAll();
+                btnId = 'keyAC';
+            } else if (key === '(' || key === ')') {
+                appendBracket();
+                btnId = 'keyBracket';
+            }
+
+            if (btnId) {
+                const el = document.getElementById(btnId);
+                if (el) {
+                    el.classList.add('keyboard-active');
+                    setTimeout(() => el.classList.remove('keyboard-active'), 150);
+                }
+            }
+        });
+    </script>
+</body>
+</html>
